@@ -5,20 +5,11 @@
 <style>
 body{margin:0;background:black;overflow:hidden}
 canvas{display:block}
-#txt{
-position:absolute;
-left:50%;
-top:58%;
-transform:translate(-50%,-50%);
-color:white;
-font-family:sans-serif;
-}
 </style>
 </head>
 
 <body>
 
-<div id="txt">اضغط</div>
 <canvas id="c"></canvas>
 
 <script>
@@ -30,11 +21,11 @@ canvas.width=innerWidth
 canvas.height=innerHeight
 
 let particles=[]
-let started=false
+let mode="dot"
 let finger=null
 
-const count=9000
-const scale=Math.min(innerWidth,innerHeight)*0.035
+const count=8000
+const scale=Math.min(innerWidth,innerHeight)*0.04
 
 function heart(t){
 
@@ -45,7 +36,7 @@ return {x,y}
 
 }
 
-function create(){
+function createHeart(){
 
 particles=[]
 
@@ -62,10 +53,8 @@ y:canvas.height/2,
 tx:canvas.width/2+p.x*scale,
 ty:canvas.height/2-p.y*scale,
 
-vx:(Math.random()-0.5)*30,
-vy:(Math.random()-0.5)*30,
-
-spread:2+Math.random()*3
+vx:(Math.random()-0.5)*20,
+vy:(Math.random()-0.5)*20
 
 })
 
@@ -78,11 +67,14 @@ function draw(){
 ctx.fillStyle="rgba(0,0,0,0.25)"
 ctx.fillRect(0,0,canvas.width,canvas.height)
 
-if(!started){
+if(mode==="dot"){
 
+ctx.shadowBlur=25
+ctx.shadowColor="white"
 ctx.fillStyle="white"
+
 ctx.beginPath()
-ctx.arc(canvas.width/2,canvas.height/2,3,0,Math.PI*2)
+ctx.arc(canvas.width/2,canvas.height/2,4,0,Math.PI*2)
 ctx.fill()
 
 requestAnimationFrame(draw)
@@ -90,6 +82,7 @@ return
 
 }
 
+ctx.shadowBlur=10
 ctx.fillStyle="white"
 
 particles.forEach(p=>{
@@ -102,13 +95,20 @@ if(finger){
 let dx=finger.x-p.x
 let dy=finger.y-p.y
 
-p.vx+=dx*0.0008
-p.vy+=dy*0.0008
+p.vx+=dx*0.0009
+p.vy+=dy*0.0009
 
 }
 
-p.x+=p.vx+(p.tx-p.x)*0.02+(Math.random()-0.5)*p.spread
-p.y+=p.vy+(p.ty-p.y)*0.02+(Math.random()-0.5)*p.spread
+else{
+
+p.x+=(p.tx-p.x)*0.02
+p.y+=(p.ty-p.y)*0.02
+
+}
+
+p.x+=p.vx
+p.y+=p.vy
 
 ctx.beginPath()
 ctx.arc(p.x,p.y,1.2,0,Math.PI*2)
@@ -124,10 +124,18 @@ draw()
 
 canvas.onclick=()=>{
 
-started=true
-document.getElementById("txt").style.display="none"
+if(mode==="dot"){
 
-create()
+createHeart()
+mode="heart"
+
+}
+
+else{
+
+mode="dot"
+
+}
 
 }
 
@@ -141,12 +149,6 @@ finger={x:e.touches[0].clientX,y:e.touches[0].clientY}
 
 canvas.addEventListener("touchend",()=>{
 finger=null
-})
-
-canvas.addEventListener("dblclick",()=>{
-
-create()
-
 })
 
 </script>
