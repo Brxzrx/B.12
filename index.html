@@ -13,54 +13,72 @@ canvas{display:block}
 
 <script>
 
-const canvas = document.getElementById("c")
-const ctx = canvas.getContext("2d")
+const canvas=document.getElementById("c")
+const ctx=canvas.getContext("2d")
 
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+canvas.width=innerWidth
+canvas.height=innerHeight
 
 let particles=[]
-const total=12000
+let color="white"
+let explode=false
+let tiltX=0
+let tiltY=0
+
+const count=5000
 
 function heart(t){
-let x = 16*Math.pow(Math.sin(t),3)
-let y = 13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)
+let x=16*Math.pow(Math.sin(t),3)
+let y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)
 return {x:x,y:-y}
 }
 
-for(let i=0;i<total;i++){
+for(let i=0;i<count;i++){
 
 let t=Math.random()*Math.PI*2
-let p=heart(t)
 
 particles.push({
+t:t,
+speed:0.002+Math.random()*0.003,
 x:canvas.width/2,
 y:canvas.height/2,
-tx:canvas.width/2+p.x*20,
-ty:canvas.height/2+p.y*20,
-vx:(Math.random()-0.5)*15,
-vy:(Math.random()-0.5)*15
+vx:0,
+vy:0
 })
 
 }
 
 function draw(){
 
-ctx.fillStyle="rgba(0,0,0,0.25)"
+ctx.fillStyle="rgba(0,0,0,0.2)"
 ctx.fillRect(0,0,canvas.width,canvas.height)
 
-ctx.fillStyle="white"
+ctx.shadowBlur=15
+ctx.shadowColor=color
+ctx.fillStyle=color
 
 particles.forEach(p=>{
 
-p.vx*=0.92
-p.vy*=0.92
+p.t+=p.speed
 
-p.x+=p.vx+(p.tx-p.x)*0.02
-p.y+=p.vy+(p.ty-p.y)*0.02
+let pos=heart(p.t)
+
+let tx=canvas.width/2+pos.x*20+tiltX
+let ty=canvas.height/2+pos.y*20+tiltY
+
+if(explode){
+p.vx+=(Math.random()-0.5)*4
+p.vy+=(Math.random()-0.5)*4
+}
+
+p.x+= (tx-p.x)*0.05 + p.vx
+p.y+= (ty-p.y)*0.05 + p.vy
+
+p.vx*=0.9
+p.vy*=0.9
 
 ctx.beginPath()
-ctx.arc(p.x,p.y,1.2,0,Math.PI*2)
+ctx.arc(p.x,p.y,1.4,0,Math.PI*2)
 ctx.fill()
 
 })
@@ -71,6 +89,27 @@ requestAnimationFrame(draw)
 
 draw()
 
+canvas.onclick=()=>{
+
+explode=true
+
+setTimeout(()=>{
+explode=false
+},400)
+
+let colors=["#ff4d6d","#ffd166","#06d6a0","#4cc9f0","#f72585"]
+color=colors[Math.floor(Math.random()*colors.length)]
+
+}
+
+window.addEventListener("deviceorientation",e=>{
+
+tiltX=e.gamma*3
+tiltY=e.beta*2
+
+})
+
 </script>
+
 </body>
 </html>
